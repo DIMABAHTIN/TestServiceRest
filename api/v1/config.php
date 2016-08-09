@@ -17,5 +17,8 @@ define('MYSQL_CHARSET', 'utf8');
 date_default_timezone_set('Asia/Krasnoyarsk');
 
 // debug ON || OFF
-define('DEBUG', '0');
+define('DEBUG', '1');
+
+define('PASSWORD_KEY1', 'bK');
+define('PASSWORD_KEY2', '3O.');
 

@@ -11,7 +11,7 @@ require 'bootstrap.php';
 // get the HTTP method, path and body of the request
 $method = $_SERVER['REQUEST_METHOD'];
 $request = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
-$input = json_decode(file_get_contents('php://input'),true);
+$input = file_get_contents('php://input');
 
 $action = $request[2];
 $data = $request[3];
@@ -20,7 +20,7 @@ $data = $request[3];
 if($action == 'users') {
     require 'class/users_class.php';
     $user = new users_class();
-
+ 
     switch ($method) {
         // get list of all users (json)
         case 'GET':
@@ -40,14 +40,16 @@ if($action == 'users') {
             break;
 
     // add new user
-        case 'PUT':
+        case 'POST':
             if($data == '') {
-                write_log($input);
+                write_log($input, 'new_user');
                     if ($user->add_user($input) > 0) {
                         http_response_code(201);
                     } else {
-                        http_response_code(500);
+                        http_response_code(409);
                     }
+            } else {
+                http_response_code(405);
             }
             break;
 
@@ -62,9 +64,10 @@ if($action == 'users') {
             }
         break;
         
-        case 'POST':
+        case 'PUT':
+            
             if($data != '') {
-                write_log($input . $data, 'post');
+                write_log($input . $data, 'put');
                 $res = $user->update_user($data, $input);
                 if($res > 0) {
                     http_response_code(201);
