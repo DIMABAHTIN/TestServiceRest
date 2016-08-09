@@ -31,13 +31,29 @@ class users_class
         $user_array = array_map('addslashes', $user_array);
         extract($user_array);
 
+        ///echo $name . '-' . $password;
+
+        if(empty($name) || empty($email) || empty($password)) {
+            return FALSE;
+        }
+
+        // check for dublicate users
+        $sql = "SELECT COUNT(*) as c FROM `users` WHERE `email`='". $email ."' OR `name`='". $name ."';";
+        $res = $db->query($sql)->fetchColumn();
+        
+        if($res > 0) {
+            return 0;
+        }
+
+        // zasoling
+        $password = PASSWORD_KEY1 . $password . PASSWORD_KEY2;
+
+        //insert new user
         $sql = "INSERT INTO `users` (name, email, password, token, datetime) 
         VALUES ('". $name ."', '". $email ."', '". $password ."', '". $this->gen_token($name) ."', NOW())";
         write_log($sql);
         $res = $db->exec($sql);
         return $res;
-
-
     }
 
     public function get_list() {
@@ -65,6 +81,12 @@ class users_class
         $user_array = array_map('addslashes', $user_array);
         extract($user_array);
 
+        if(empty($name) || empty($email) || empty($password)) {
+            return FALSE;
+        }
+
+        $password = md5(PASSWORD_KEY1 . $password . PASSWORD_KEY2);
+
         $sql = "UPDATE `users` SET `name`='". $name ."',`email`='". $email ."',`password`='". $password ."' WHERE `token`='" .$token. "';";
         write_log($sql);
         $res = $db->exec($sql);
@@ -84,6 +106,5 @@ class users_class
         $res = $db->exec($sql);
         return $res;
     }
-
 
 }
