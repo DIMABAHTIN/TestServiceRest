@@ -31,8 +31,6 @@ class users_class
         $user_array = array_map('addslashes', $user_array);
         extract($user_array);
 
-        ///echo $name . '-' . $password;
-
         if(empty($name) || empty($email) || empty($password)) {
             return FALSE;
         }
@@ -40,13 +38,13 @@ class users_class
         // check for dublicate users
         $sql = "SELECT COUNT(*) as c FROM `users` WHERE `email`='". $email ."' OR `name`='". $name ."';";
         $res = $db->query($sql)->fetchColumn();
-        
+
         if($res > 0) {
             return 0;
         }
 
         // zasoling
-        $password = PASSWORD_KEY1 . $password . PASSWORD_KEY2;
+        $password = md5(PASSWORD_KEY1 . $password . PASSWORD_KEY2);
 
         //insert new user
         $sql = "INSERT INTO `users` (name, email, password, token, datetime) 
@@ -54,6 +52,8 @@ class users_class
         write_log($sql);
         $res = $db->exec($sql);
         return $res;
+
+
     }
 
     public function get_list() {
@@ -106,5 +106,6 @@ class users_class
         $res = $db->exec($sql);
         return $res;
     }
+
 
 }
